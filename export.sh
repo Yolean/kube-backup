@@ -10,7 +10,10 @@ namespaces=$(kubectl get namespaces -o=jsonpath='{.items[*].metadata.name}')
 for N in $namespaces; do
     mkdir -p "$EXPORT/$N"
     
-    all=$(kubectl --namespace=$N get all -o=name)
+    all=$( \
+      kubectl --namespace=$N get all -o=name; \
+      kubectl --namespace=$N get configmap -o=name; \
+    )
     echo "### namespace $N: $(echo "$all" | wc -l) resources"
     for R in $all; do
         type=$(echo $R | awk -F '/' '{ print $1 }')
