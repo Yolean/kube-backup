@@ -20,7 +20,10 @@ for N in $namespaces; do
         name=$(echo $R | awk -F '/' '{ print $2 }')
         mkdir -p "$EXPORT/$N/$type"
         echo -n "# ($type) $name, lines of yaml: "
-        kubectl --namespace=$N get $R --export -o=yaml | tee "$EXPORT/$N/$type/$name.yml" | wc -l
+        dest="$EXPORT/$N/$type/$name"
+        kubectl --namespace=$N get $R --export -o=yaml | tee "$dest.yml" | wc -l
+        grep -q 'kubernetes.io/created-by:' "$dest.yml" && echo "# ... is a generated resource" && \
+          mv "$dest.yml" "$dest.k8s-created.yml"
     done
 
 done
