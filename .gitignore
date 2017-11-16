@@ -1,2 +1,3 @@
 *.k8s-created.yml
 cluster-autoscaler-status.yml
+*.backup2*/

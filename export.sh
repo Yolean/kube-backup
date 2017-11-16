@@ -4,6 +4,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 EXPORT="$DIR/export"
 echo "Exporting to $EXPORT"
+[ -d "$EXPORT" ] && PREVIOUS="$EXPORT.backup$(date +%FT%H%M%S)" && mv -v "$EXPORT" "$PREVIOUS"
+mkdir "$EXPORT"
 
 namespaces=$(kubectl get namespaces -o=jsonpath='{.items[*].metadata.name}')
 
@@ -45,5 +47,8 @@ echo "### non-namespaced: $(echo "$all" | wc -l) resources"
 for R in $nonnamespaced; do
     getexport "" "$R"
 done
+
+git add -u "$EXPORT"
+git add "$EXPORT"
 
 echo "Export completed to $EXPORT"
