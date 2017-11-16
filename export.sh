@@ -13,9 +13,10 @@ getexport() {
 
     type=$(echo $R | awk -F '/' '{ print $1 }')
     name=$(echo $R | awk -F '/' '{ print $2 }')
-    mkdir -p "$EXPORT/$N/$type"
+    [ -z "$N" ] && edir="$EXPORT/_/$type" || edir="$EXPORT/$N/$type"
+    mkdir -p "$edir"
     echo -n "# ($type) $name, lines of yaml: "
-    dest="$EXPORT/$N/$type/$name"
+    dest="$edir/$name"
     kubectl --namespace=$N get $R --export -o=yaml | tee "$dest.yml" | wc -l
     grep -q 'kubernetes.io/created-by:' "$dest.yml" && echo "# ... is a generated resource" && \
         mv "$dest.yml" "$dest.k8s-created.yml"
@@ -28,6 +29,7 @@ for N in $namespaces; do
     all=$( \
       kubectl --namespace=$N get all -o=name; \
       kubectl --namespace=$N get configmap -o=name; \
+      kubectl --namespace=$N get persistentvolumeclaim -o=name; \
     )
     echo "### namespace $N: $(echo "$all" | wc -l) resources"
     for R in $all; do
@@ -35,4 +37,13 @@ for N in $namespaces; do
     done
 
 done
+
+nonnamespaced=$( \
+    kubectl --namespace=$N get persistentvolume -o=name; \
+)
+echo "### non-namespaced: $(echo "$all" | wc -l) resources"
+for R in $nonnamespaced; do
+    getexport "" "$R"
+done
+
 echo "Export completed to $EXPORT"
