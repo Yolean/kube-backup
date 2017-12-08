@@ -20,7 +20,9 @@ getexport() {
     echo -n "# ($type) $name, lines of yaml: "
     dest="$edir/$name"
     kubectl --namespace=$N get $R --export -o=yaml | tee "$dest.yml" | wc -l
-    grep -q 'kubernetes.io/created-by:' "$dest.yml" && echo "# ... is a generated resource" && \
+    grep -q 'kubernetes.io/created-by:' "$dest.yml" && echo "# ... is a managed resource" && \
+        mv "$dest.yml" "$dest.k8s-created.yml"
+    [ -f "$dest.yml" ] && grep -q 'deployment.kubernetes.io/desired-replicas:' "$dest.yml" && echo "# ... is a deployment resource" && \
         mv "$dest.yml" "$dest.k8s-created.yml"
     : # don't exit on missing created-by
 }
