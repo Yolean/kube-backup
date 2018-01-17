@@ -42,6 +42,7 @@ done
 
 nonnamespaced=$( \
     kubectl --namespace=$N get persistentvolume -o=name; \
+    kubectl --namespace=$N get crd -o=name; \
 )
 echo "### non-namespaced: $(echo "$all" | wc -l) resources"
 for R in $nonnamespaced; do
