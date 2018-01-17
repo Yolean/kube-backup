@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 EXPORT="$DIR/export"
@@ -19,7 +20,10 @@ getexport() {
     mkdir -p "$edir"
     echo -n "# ($type) $name, lines of yaml: "
     dest="$edir/$name"
-    kubectl --namespace=$N get $R --export -o=yaml | tee "$dest.yml" | wc -l
+    kubectl --namespace=$N get $R --export -o=yaml \
+      | sed "s/namespace: \"\"/namespace: \"$N\"/" \
+      | tee "$dest.yml" \
+      | wc -l
     grep -q 'kubernetes.io/created-by:' "$dest.yml" && echo "# ... is a managed resource" && \
         mv "$dest.yml" "$dest.k8s-created.yml"
     [ -f "$dest.yml" ] && grep -q 'deployment.kubernetes.io/desired-replicas:' "$dest.yml" && echo "# ... is a deployment resource" && \
