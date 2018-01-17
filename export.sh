@@ -25,6 +25,15 @@ getexport() {
     : # don't exit on missing created-by
 }
 
+nonnamespaced=$( \
+    kubectl --namespace=$N get persistentvolume -o=name; \
+    kubectl --namespace=$N get crd -o=name; \
+)
+echo "### non-namespaced: $(echo "$all" | wc -l) resources"
+for R in $nonnamespaced; do
+    getexport "" "$R"
+done
+
 for N in $namespaces; do
     mkdir -p "$EXPORT/$N"
     
@@ -38,15 +47,6 @@ for N in $namespaces; do
         getexport "$N" "$R"
     done
 
-done
-
-nonnamespaced=$( \
-    kubectl --namespace=$N get persistentvolume -o=name; \
-    kubectl --namespace=$N get crd -o=name; \
-)
-echo "### non-namespaced: $(echo "$all" | wc -l) resources"
-for R in $nonnamespaced; do
-    getexport "" "$R"
 done
 
 git add -u "$EXPORT"
