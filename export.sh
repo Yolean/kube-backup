@@ -25,16 +25,14 @@ getexport() {
     : # don't exit on missing created-by
 }
 
-crd=$( \
-    kubectl --namespace=$N get crd -o=name; \
-)
+crd=$( kubectl get crd -o=name | awk -F/ '{print $2}' )
 echo "### CRDs: $(echo "$crd" | wc -l) resources"
 for R in $crd; do
-    getexport "" "$R"
+    getexport "" "customresourcedefinitions/$R"
 done
 
 nonnamespaced=$( \
-    kubectl --namespace=$N get persistentvolume -o=name; \
+    kubectl get persistentvolume -o=name; \
 )
 echo "### non-namespaced: $(echo "$nonnamespaced" | wc -l) resources"
 for R in $nonnamespaced; do
@@ -49,6 +47,9 @@ for N in $namespaces; do
       kubectl --namespace=$N get configmap -o=name; \
       kubectl --namespace=$N get persistentvolumeclaim -o=name; \
     )
+    for C in $crd; do
+        all="$all $(kubectl --namespace=$N get $C -o=name)";
+    done
     echo "### namespace $N: $(echo "$all" | wc -l) resources"
     for R in $all; do
         getexport "$N" "$R"
