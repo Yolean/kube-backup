@@ -27,6 +27,8 @@ getexport() {
         mv "$dest.yml" "$dest.k8s-created.yml"
     [ -f "$dest.yml" ] && grep -q 'deployment.kubernetes.io/desired-replicas:' "$dest.yml" && echo "# ... is a deployment resource" && \
         mv "$dest.yml" "$dest.k8s-created.yml"
+    [ -f "$dest.yml" ] && grep -q 'generateName:' "$dest.yml" && echo "# ... is a generated resource" && \
+        mv "$dest.yml" "$dest.k8s-created.yml"
     : # don't exit on missing created-by
 }
 
