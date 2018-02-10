@@ -29,7 +29,7 @@ getexport() {
         mv "$dest.yml" "$dest.k8s-created.yml"
     [ -f "$dest.yml" ] && grep -q 'generateName:' "$dest.yml" && echo "# ... is a generated resource" && \
         mv "$dest.yml" "$dest.k8s-created.yml"
-    [ -f "$dest.yml" ] && grep -q 'ownerReference:' "$dest.yml" && echo "# ... is an owned resource" && \
+    [ -f "$dest.yml" ] && grep -q 'ownerReferences:' "$dest.yml" && echo "# ... is an owned resource" && \
         mv "$dest.yml" "$dest.k8s-created.yml"
     : # don't exit on missing created-by
 }
